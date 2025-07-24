@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AZAG System - Dashboard Administrativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Favicon do AZAG System -->
+    <link rel="icon" href="Gemini_Generated_Image_yk0wlayk0wlayk0w.ico" type="image/x-icon">
+    <style>
+        /* Estilos base para um visual dark, futurista e tecnológico aprimorado */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05070c; /* Fundo ultra-escuro */
+            color: #e0f2f7; /* Texto quase branco, levemente azulado */
+            overflow-x: hidden; /* Evita rolagem horizontal */
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        /* Efeito de grade de fundo animada */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridPulse 15s infinite linear;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes gridPulse {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 40px; }
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Orbitron', sans-serif; /* Fonte futurista para títulos */
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8), 0 0 25px rgba(0, 255, 255, 0.5); /* Brilho ciano mais forte */
+            color: #00e6e6; /* Cor principal dos títulos */
+        }
+
+        .card-bg {
+            background-color: rgba(10, 15, 25, 0.98); /* Fundo do card quase opaco */
+            border: 1px solid #00b3b3; /* Borda ciano sutil */
+            border-radius: 1.5rem; /* Cantos mais arredondados */
+            box-shadow: 
+                0 0 35px rgba(0, 255, 255, 0.3), /* Brilho externo forte */
+                inset 0 0 20px rgba(0, 255, 255, 0.15); /* Brilho interno */
+            backdrop-filter: blur(12px); /* Efeito de vidro fosco mais intenso */
+            -webkit-backdrop-filter: blur(12px); /* Compatibilidade Safari */
+            position: relative;
+            z-index: 1;
+            padding: 2.5rem;
+        }
+
+        .input-field {
+            background-color: #1a202c; /* Fundo dos inputs */
+            border: 1px solid #008080; /* Borda ciano escura */
+            color: #e0f2f7; /* Texto dos inputs */
+            transition: all 0.4s ease-in-out;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            box-shadow: inset 0 0 5px rgba(0, 255, 255, 0.1);
+        }
+        .input-field:focus {
+            border-color: #00e6e6; /* Borda ao focar */
+            box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.3); /* Sombra e brilho ao focar */
+            background-color: #21262d; /* Levemente mais claro ao focar */
+            outline: none; /* Remove outline padrão do navegador */
+        }
+
+        .btn-primary {
+            background-image: linear-gradient(to right, #00e6e6, #8a2be2); /* Gradiente ciano-roxo */
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1); /* Transição mais suave */
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5);
+            border: none;
+            border-radius: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .btn-primary:hover {
+            background-image: linear-gradient(to right, #00cccc, #7a1ad5);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px) scale(1.03);
+            cursor: pointer;
+        }
+
+        .metric-card {
+            background-color: rgba(10, 15, 25, 0.9);
+            border: 1px solid #008080;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-card h3 {
+            color: #00e6e6;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .metric-card p {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e0f2f7;
+        }
+        .metric-card .percentage {
+            font-size: 1.8rem;
+            color: #00ff00; /* Verde para porcentagem */
+        }
+
+        /* Para telas menores */
+        @media (max-width: 768px) {
+            .card-bg {
+                padding: 1.5rem;
+                border-radius: 1rem;
+            }
+            h1 {
+                font-size: 2.2rem;
+            }
+            .metric-card {
+                padding: 1rem;
+            }
+            .metric-card h3 {
+                font-size: 1rem;
+            }
+            .metric-card p {
+                font-size: 1.5rem;
+            }
+            .metric-card .percentage {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-4">
+
+    <div class="card-bg p-8 rounded-lg shadow-xl w-full max-w-5xl mb-8">
+        <h1 class="text-3xl font-bold text-gray-100 mb-6 text-center">Dashboard Administrativo <span class="text-blue-400">| AZAG System</span></h1>
+        <p class="text-gray-300 mb-8 text-center">Visualize as métricas de desempenho dos PIX gerados e pagos, com a opção de filtrar por período e por cliente SaaS.</p>
+
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 mb-8">
+            <div class="w-full md:w-1/4">
+                <label for="datePreset" class="block text-sm font-medium text-gray-300 mb-1">Predefinição de Data:</label>
+                <select id="datePreset" class="input-field w-full">
+                    <option value="custom">Período Personalizado</option>
+                    <option value="last7days">Últimos 7 Dias</option>
+                    <option value="currentMonth">Mês Atual</option>
+                    <option value="currentYear">Ano Atual</option>
+                </select>
+            </div>
+            <div class="w-full md:w-1/4">
+                <label for="startDate" class="block text-sm font-medium text-gray-300 mb-1">Data Inicial:</label>
+                <input type="date" id="startDate" class="input-field w-full">
+            </div>
+            <div class="w-full md:w-1/4">
+                <label for="endDate" class="block text-sm font-medium text-gray-300 mb-1">Data Final:</label>
+                <input type="date" id="endDate" class="input-field w-full">
+            </div>
+            <div class="w-full md:w-1/4">
+                <label for="clientFilter" class="block text-sm font-medium text-gray-300 mb-1">Filtrar por Cliente SaaS:</label>
+                <select id="clientFilter" class="input-field w-full">
+                    <option value="all">Todos (Suas Vendas + Clientes)</option>
+                    <option value="null">Apenas Suas Vendas (SaaS)</option>
+                    <!-- Opções de clientes SaaS serão carregadas aqui via JS -->
+                </select>
+            </div>
+            <button id="applyFiltersBtn" class="btn-primary mt-6 md:mt-4 py-2 px-6 rounded-md text-lg font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                <i class="fas fa-filter mr-2"></i> Aplicar Filtros
+            </button>
+        </div>
+
+        <div id="dashboardMetrics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="metric-card">
+                <h3><i class="fas fa-qrcode mr-2"></i> PIX Gerados</h3>
+                <p id="totalPixGerados">0</p>
+            </div>
+            <div class="metric-card">
+                <h3><i class="fas fa-check-circle mr-2"></i> PIX Pagos</h3>
+                <p id="totalPixPagos">0</p>
+            </div>
+            <div class="metric-card">
+                <h3><i class="fas fa-dollar-sign mr-2"></i> Valor Bruto PIX</h3>
+                <p id="valorPixBruto">R$ 0,00</p>
+            </div>
+            <div class="metric-card">
+                <h3><i class="fas fa-hand-holding-usd mr-2"></i> Valor PIX Pago</h3>
+                <p id="valorPixPago">R$ 0,00</p>
+            </div>
+            <div class="metric-card md:col-span-2 lg:col-span-1">
+                <h3><i class="fas fa-percent mr-2"></i> % de Conversão</h3>
+                <p id="percentConversion" class="percentage">0.00%</p>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="text-center text-gray-400 mt-8 hidden">
+            <i class="fas fa-spinner fa-spin text-4xl"></i>
+            <p class="mt-2">Carregando dados do dashboard...</p>
+        </div>
+        <div id="errorMessage" class="text-center text-red-500 mt-8 hidden">
+            <p><i class="fas fa-exclamation-triangle mr-2"></i> Erro ao carregar os dados. Tente novamente.</p>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-5xl">
+            <div class="card-bg p-6">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-chart-line mr-2"></i> PIX Gerados e Pagos por Dia</h3>
+                <canvas id="dailyPixChart"></canvas>
+            </div>
+            <div class="card-bg p-6">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-city mr-2"></i> Top Cidades com Mais Vendas</h3>
+                <canvas id="topCitiesChart"></canvas>
+            </div>
+            <div class="card-bg p-6 lg:col-span-2">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-globe mr-2"></i> Top Origens de Tráfego (Referers)</h3>
+                <canvas id="topReferersChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://lead-tracker-api-production.up.railway.app'; // Sua URL base da API Node.js
+
+        const datePresetSelect = document.getElementById('datePreset');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const clientFilterSelect = document.getElementById('clientFilter');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+
+        const totalPixGeradosElem = document.getElementById('totalPixGerados');
+        const totalPixPagosElem = document.getElementById('totalPixPagos');
+        const valorPixBrutoElem = document.getElementById('valorPixBruto');
+        const valorPixPagoElem = document.getElementById('valorPixPago');
+        const percentConversionElem = document.getElementById('percentConversion');
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let dailyPixChartInstance;
+        let topCitiesChartInstance;
+        let topReferersChartInstance;
+
+        // Função para formatar valores monetários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
+        }
+
+        // Função para converter UTC para o horário de Brasília (UTC-3)
+        function convertToBrasiliaDateString(utcDateString) {
+            if (!utcDateString) return '';
+            // Cria um objeto Date a partir da string UTC
+            const date = new Date(utcDateString);
+            
+            // Formata a data para o fuso horário de Brasília (America/Sao_Paulo)
+            // Usamos 'pt-BR' para garantir o formato DD/MM/YYYY
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                timeZone: 'America/Sao_Paulo' 
+            };
+            return date.toLocaleDateString('pt-BR', options);
+        }
+
+        // Função para carregar clientes SaaS no filtro
+        async function loadSaasClients() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/saasClients`);
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    // Adiciona a opção "Apenas Suas Vendas (SaaS)"
+                    // O valor 'null' será interpretado no backend como client_id IS NULL
+                    const saasSalesOption = document.createElement('option');
+                    saasSalesOption.value = 'null'; 
+                    saasSalesOption.textContent = 'Apenas Suas Vendas (SaaS)';
+                    clientFilterSelect.appendChild(saasSalesOption);
+
+                    result.clients.forEach(client => {
+                        const option = document.createElement('option');
+                        option.value = client.client_id;
+                        option.textContent = client.client_name;
+                        clientFilterSelect.appendChild(option);
+                    });
+                } else {
+                    console.error('Erro ao carregar clientes SaaS:', result.message || 'Erro desconhecido');
+                    errorMessage.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Erro de rede ao carregar clientes SaaS:', error);
+                errorMessage.classList.remove('hidden');
+            }
+        }
+
+        // Função para buscar e exibir os dados do dashboard
+        async function fetchDashboardData() {
+            loadingIndicator.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            let clientId = clientFilterSelect.value; // Será 'all', 'null', ou um client_id específico
+
+            // Constrói o parâmetro clientId para a chamada da API
+            let clientIdParamForAPI = '';
+            if (clientId !== 'all') { // Se não for 'all', então é 'null' ou um client_id específico
+                clientIdParamForAPI = `&clientId=${clientId}`;
+            }
+            // Se clientId for 'all', clientIdParamForAPI permanece vazio, significando que nenhum parâmetro clientId é enviado,
+            // e o backend irá padronizar para 'all' conforme o esperado.
+
+            console.log(`Buscando dados para: Data Inicial=${startDate}, Data Final=${endDate}, ClientId=${clientId}`);
+            console.log(`Parâmetros da URL da API para clientId: ${clientIdParamForAPI}`);
+
+            try {
+                // Fetch métricas gerais
+                const metricsResponse = await fetch(`${API_BASE_URL}/api/dashboard?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}`);
+                const metricsResult = await metricsResponse.json();
+                console.log('Resposta da API de Métricas:', metricsResult);
+
+                if (metricsResponse.ok && metricsResult.status === 'success') {
+                    const data = metricsResult.data;
+                    totalPixGeradosElem.textContent = data.totalPixGerados;
+                    totalPixPagosElem.textContent = data.totalPixPagos;
+                    valorPixBrutoElem.textContent = formatCurrency(data.valorPixBruto);
+                    valorPixPagoElem.textContent = formatCurrency(data.valorPixPago);
+                    percentConversionElem.textContent = `${data.percentConversion}%`;
+                } else {
+                    console.error('Erro ao buscar métricas do dashboard:', metricsResult.message || 'Erro desconhecido');
+                    errorMessage.classList.remove('hidden');
+                }
+
+                // Fetch dados diários para gráfico
+                const dailyResponse = await fetch(`${API_BASE_URL}/api/dashboard/dailyPixData?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}`);
+                const dailyResult = await dailyResponse.json();
+                console.log('Resposta da API de Dados Diários de PIX:', dailyResult);
+
+                if (dailyResponse.ok && dailyResult.status === 'success') {
+                    renderDailyPixChart(dailyResult.data);
+                } else {
+                    console.error('Erro ao buscar dados diários:', dailyResult.message || 'Erro desconhecido');
+                }
+
+                // Fetch top cidades
+                const citiesResponse = await fetch(`${API_BASE_URL}/api/dashboard/topCities?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}&limit=5`);
+                const citiesResult = await citiesResponse.json();
+                console.log('Resposta da API de Top Cidades:', citiesResult);
+
+                if (citiesResponse.ok && citiesResult.status === 'success') {
+                    renderTopCitiesChart(citiesResult.data);
+                } else {
+                    console.error('Erro ao buscar top cidades:', citiesResult.message || 'Erro desconhecido');
+                }
+
+                // Fetch top referers
+                const referersResponse = await fetch(`${API_BASE_URL}/api/dashboard/topReferers?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}&limit=5`);
+                const referersResult = await referersResponse.json();
+                console.log('Resposta da API de Top Referers:', referersResult);
+
+                if (referersResponse.ok && referersResult.status === 'success') {
+                    renderTopReferersChart(referersResult.data);
+                } else {
+                    console.error('Erro ao buscar top referers:', referersResult.message || 'Erro desconhecido');
+                }
+
+            } catch (error) {
+                console.error('Erro de rede ao buscar dados do dashboard:', error);
+                errorMessage.classList.remove('hidden');
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // Funções para renderizar gráficos com Chart.js
+        function renderDailyPixChart(data) {
+            const ctx = document.getElementById('dailyPixChart').getContext('2d');
+            
+            // Convertendo a data para o formato de Brasília para exibição no gráfico
+            const labels = data.map(item => convertToBrasiliaDateString(item.date));
+            const pixGenerated = data.map(item => item.pix_generated);
+            const pixPaid = data.map(item => item.pix_paid);
+
+            if (dailyPixChartInstance) {
+                dailyPixChartInstance.destroy();
+            }
+
+            dailyPixChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'PIX Gerados',
+                            data: pixGenerated,
+                            borderColor: '#00e6e6',
+                            backgroundColor: 'rgba(0, 230, 230, 0.2)',
+                            tension: 0.3,
+                            fill: true,
+                        },
+                        {
+                            label: 'PIX Pagos',
+                            data: pixPaid,
+                            borderColor: '#00ff00',
+                            backgroundColor: 'rgba(0, 255, 0, 0.2)',
+                            tension: 0.3,
+                            fill: true,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTopCitiesChart(data) {
+            const ctx = document.getElementById('topCitiesChart').getContext('2d');
+
+            const labels = data.map(item => item.city || 'Desconhecida');
+            const sales = data.map(item => item.total_sales);
+
+            if (topCitiesChartInstance) {
+                topCitiesChartInstance.destroy();
+            }
+
+            topCitiesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Vendas',
+                        data: sales,
+                        backgroundColor: [
+                            'rgba(0, 230, 230, 0.7)',
+                            'rgba(138, 43, 226, 0.7)',
+                            'rgba(255, 165, 0, 0.7)',
+                            'rgba(0, 179, 0, 0.7)',
+                            'rgba(255, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                            '#00e6e6',
+                            '#8a2be2',
+                            '#ffa500',
+                            '#00b300',
+                            '#ff6384'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTopReferersChart(data) {
+            const ctx = document.getElementById('topReferersChart').getContext('2d');
+
+            const labels = data.map(item => {
+                // Simplifica o referer para melhor visualização no gráfico
+                if (item.referer === '') return 'Direto/Desconhecido';
+                try {
+                    const url = new URL(item.referer);
+                    return url.hostname.replace('www.', '');
+                } catch (e) {
+                    return item.referer; // Retorna o original se não for uma URL válida
+                }
+            });
+            const sales = data.map(item => item.total_sales);
+
+            if (topReferersChartInstance) {
+                topReferersChartInstance.destroy();
+            }
+
+            topReferersChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Vendas',
+                        data: sales,
+                        backgroundColor: [
+                            'rgba(0, 200, 200, 0.7)',
+                            'rgba(100, 149, 237, 0.7)',
+                            'rgba(255, 215, 0, 0.7)',
+                            'rgba(60, 179, 113, 0.7)',
+                            'rgba(218, 112, 214, 0.7)'
+                        ],
+                        borderColor: [
+                            '#00c8c8',
+                            '#6495ed',
+                            '#ffd700',
+                            '#3cb371',
+                            '#da70d6'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Define as datas padrão (últimos 30 dias) ou com base na predefinição
+        function setDatesFromPreset() {
+            const today = new Date();
+            let startDate;
+            let endDate = today;
+
+            switch (datePresetSelect.value) {
+                case 'last7days':
+                    startDate = new Date();
+                    startDate.setDate(today.getDate() - 7);
+                    break;
+                case 'currentMonth':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    break;
+                case 'currentYear':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    break;
+                case 'custom':
+                default:
+                    // Se for personalizado, mantém os valores atuais ou define um padrão
+                    if (!startDateInput.value || !endDateInput.value) {
+                        startDate = new Date();
+                        startDate.setDate(today.getDate() - 30);
+                    } else {
+                        return; // Não altera se já houver valores personalizados
+                    }
+                    break;
+            }
+
+            startDateInput.value = startDate.toISOString().split('T')[0];
+            endDateInput.value = endDate.toISOString().split('T')[0];
+        }
+
+        // Event Listeners
+        applyFiltersBtn.addEventListener('click', fetchDashboardData);
+        datePresetSelect.addEventListener('change', () => {
+            setDatesFromPreset();
+            // Oculta/mostra os campos de data se for "personalizado"
+            if (datePresetSelect.value === 'custom') {
+                startDateInput.removeAttribute('readonly');
+                endDateInput.removeAttribute('readonly');
+            } else {
+                startDateInput.setAttribute('readonly', true);
+                endDateInput.setAttribute('readonly', true);
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', async () => {
+            setDatesFromPreset(); // Define as datas iniciais com base na predefinição
+            await loadSaasClients();
+            fetchDashboardData();
+        });
+    </script>
+</body>
+</html>
