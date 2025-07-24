@@ -231,9 +231,17 @@
                 <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-city mr-2"></i> Top Cidades com Mais Vendas</h3>
                 <canvas id="topCitiesChart"></canvas>
             </div>
-            <div class="card-bg p-6 lg:col-span-2">
+            <div class="card-bg p-6">
                 <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-globe mr-2"></i> Top Origens de Tráfego (Referers)</h3>
                 <canvas id="topReferersChart"></canvas>
+            </div>
+            <div class="card-bg p-6">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-mobile-alt mr-2"></i> Vendas por Sistema Operacional</h3>
+                <canvas id="salesByDeviceOSChart"></canvas>
+            </div>
+            <div class="card-bg p-6">
+                <h3 class="text-xl font-bold text-gray-100 mb-4 text-center"><i class="fas fa-tablet-alt mr-2"></i> Vendas por Modelo de Dispositivo</h3>
+                <canvas id="salesByDeviceModelChart"></canvas>
             </div>
         </div>
     </div>
@@ -259,6 +267,8 @@
         let dailyPixChartInstance;
         let topCitiesChartInstance;
         let topReferersChartInstance;
+        let salesByDeviceOSChartInstance; // Nova instância de gráfico
+        let salesByDeviceModelChartInstance; // Nova instância de gráfico
 
         // Função para formatar valores monetários
         function formatCurrency(value) {
@@ -384,6 +394,28 @@
                     renderTopReferersChart(referersResult.data);
                 } else {
                     console.error('Erro ao buscar top referers:', referersResult.message || 'Erro desconhecido');
+                }
+
+                // NOVO: Fetch vendas por sistema operacional
+                const deviceOSResponse = await fetch(`${API_BASE_URL}/api/dashboard/salesByDeviceOS?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}`);
+                const deviceOSResult = await deviceOSResponse.json();
+                console.log('Resposta da API de Vendas por OS:', deviceOSResult);
+
+                if (deviceOSResponse.ok && deviceOSResult.status === 'success') {
+                    renderSalesByDeviceOSChart(deviceOSResult.data);
+                } else {
+                    console.error('Erro ao buscar vendas por OS:', deviceOSResult.message || 'Erro desconhecido');
+                }
+
+                // NOVO: Fetch vendas por modelo de dispositivo
+                const deviceModelResponse = await fetch(`${API_BASE_URL}/api/dashboard/salesByDeviceModel?startDate=${startDate}&endDate=${endDate}${clientIdParamForAPI}`);
+                const deviceModelResult = await deviceModelResponse.json();
+                console.log('Resposta da API de Vendas por Modelo:', deviceModelResult);
+
+                if (deviceModelResponse.ok && deviceModelResult.status === 'success') {
+                    renderSalesByDeviceModelChart(deviceModelResult.data);
+                } else {
+                    console.error('Erro ao buscar vendas por modelo:', deviceModelResult.message || 'Erro desconhecido');
                 }
 
             } catch (error) {
@@ -605,6 +637,135 @@
                 }
             });
         }
+
+        // NOVO: Função para renderizar gráfico de vendas por sistema operacional
+        function renderSalesByDeviceOSChart(data) {
+            const ctx = document.getElementById('salesByDeviceOSChart').getContext('2d');
+
+            const labels = data.map(item => item.device_os || 'Desconhecido');
+            const sales = data.map(item => item.total_sales);
+
+            if (salesByDeviceOSChartInstance) {
+                salesByDeviceOSChartInstance.destroy();
+            }
+
+            salesByDeviceOSChartInstance = new Chart(ctx, {
+                type: 'pie', // Gráfico de pizza para proporções
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Vendas por OS',
+                        data: sales,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)', // Vermelho
+                            'rgba(54, 162, 235, 0.7)', // Azul
+                            'rgba(255, 206, 86, 0.7)', // Amarelo
+                            'rgba(75, 192, 192, 0.7)', // Verde
+                            'rgba(153, 102, 255, 0.7)', // Roxo
+                            'rgba(255, 159, 64, 0.7)'  // Laranja
+                        ],
+                        borderColor: [
+                            '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right', // Posição da legenda
+                            labels: {
+                                color: '#e0f2f7'
+                            }
+                        },
+                        title: {
+                            display: false,
+                        }
+                    }
+                }
+            });
+        }
+
+        // NOVO: Função para renderizar gráfico de vendas por modelo de dispositivo
+        function renderSalesByDeviceModelChart(data) {
+            const ctx = document.getElementById('salesByDeviceModelChart').getContext('2d');
+
+            const labels = data.map(item => item.device_model || 'Desconhecido');
+            const sales = data.map(item => item.total_sales);
+
+            if (salesByDeviceModelChartInstance) {
+                salesByDeviceModelChartInstance.destroy();
+            }
+
+            salesByDeviceModelChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Número de Vendas',
+                        data: sales,
+                        backgroundColor: [
+                            'rgba(0, 230, 230, 0.7)',
+                            'rgba(138, 43, 226, 0.7)',
+                            'rgba(255, 165, 0, 0.7)',
+                            'rgba(0, 179, 0, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(199, 199, 199, 0.7)',
+                            'rgba(83, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            '#00e6e6',
+                            '#8a2be2',
+                            '#ffa500',
+                            '#00b300',
+                            '#ff6384',
+                            '#4bc0c0',
+                            '#9966ff',
+                            '#ff9f40',
+                            '#c7c7c7',
+                            '#5366ff'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e0f2f7'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
 
         // Define as datas padrão (últimos 30 dias) ou com base na predefinição
         function setDatesFromPreset() {
